@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      color: #00ff00;
+      min-height: 100vh;
+      background: #000;
+      overflow-x: hidden;
+      perspective: 1000px;
+    }
+
+    .game-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,20,40,0.8) 100%),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 2px,
+          rgba(0, 255, 0, 0.1) 3px,
+          rgba(0, 255, 0, 0.1) 3px
+        );
+      opacity: 0.8;
+      z-index: -2;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .pixel {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 255, 0, 0.5);
+      animation: pixelFloat var(--duration) linear infinite;
+    }
+
+    @keyframes pixelFloat {
+      0% { 
+        transform: translateY(100vh) scale(1);
+        opacity: 1;
+      }
+      100% { 
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      padding: 40px 0;
+      animation: glitchText 5s infinite;
+    }
+
+    .header h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 2.5em;
+      text-shadow: 0 0 10px #00ff00,
+                   0 0 20px #00ff00,
+                   0 0 30px #00ff00;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    @keyframes glitchText {
+      0%, 100% { transform: none; opacity: 1; }
+      98% { transform: none; opacity: 1; }
+      99% { transform: translate(-2px, 1px); opacity: 0.8; }
+    }
+
+    .message-box {
+      background: rgba(0, 50, 0, 0.4);
+      border: 2px solid #00ff00;
+      border-radius: 5px;
+      padding: 30px;
+      margin: 30px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(0, 255, 0, 0.1) 50%,
+        transparent 100%
+      );
+      animation: scanline 4s linear infinite;
+    }
+
+    @keyframes scanline {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin: 40px 0;
+    }
+
+    .gallery-item {
+      height: 250px;
+      border: 2px solid #00ff00;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .gallery-item::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 255, 0, 0.2) 0%,
+        transparent 100%
+      );
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    }
+
+    .button {
+      background: #000;
+      color: #00ff00;
+      border: 2px solid #00ff00;
+      padding: 15px 35px;
+      margin: 15px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .button:hover {
+      background: #00ff00;
+      color: #000;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    .game-character {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      background: url('/api/placeholder/40/40') no-repeat center/contain;
+      pointer-events: none;
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .achievement {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.8em;
+      animation: achievementSlide 4s forwards;
+      z-index: 1000;
+    }
+
+    @keyframes achievementSlide {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { transform: translateX(0); opacity: 1; }
+      90% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+
+    .power-up {
+      position: absolute;
+      animation: powerUpFloat 2s infinite;
+    }
+
+    @keyframes powerUpFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-background"></div>
+  
+  <div class="container">
+    <div class="header">
+      <h1>PLAYER 1: MI GAMER FAVORITO</h1>
+      <div style="font-size: 0.8em; color: #00ff00;">
+        PRESS START TO BEGIN OUR ADVENTURE ❤️
+      </div>
+    </div>
+
+    <div class="message-box">
+      <h2>MISSION BRIEFING:</h2>
+      <p>Has desbloqueado el nivel más especial: nuestro amor. Como en todo buen RPG, cada día es una nueva misión juntos. Ya sea en modo cooperativo o PvP, siempre serás mi player 1 favorito.</p>
+      <div class="power-up">🎮</div>
+    </div>
+
+    <div class="gallery">
+      <div class="gallery-item">
+        <img src="gallery/Gaming Moment 1.jpeg" alt="Gaming Moment 1" />
+      </div>
+      <div class="gallery-item">
+        <img src="gallery/Moto Moment 1.jpeg" alt="Moto Moment 1" />
+      </div>
+      <div class="gallery-item">
+        <img src="gallery/Gaming Moment 2.jpeg" alt="Gaming Moment 2" />
+      </div>
+      <div class="gallery-item">
+        <img src="gallery/Moto Moment 2.jpeg" alt="Moto Moment 2" />
+      </div>
+    </div>
+
+    <div class="message-box">
+      <h2>ACHIEVEMENT UNLOCKED:</h2>
+      <p>Has conseguido el amor de una gamer. Estadísticas especiales: Carisma +100, Amor +∞, Habilidad en juegos: Legendaria</p>
+      <div class="power-up">🏆</div>
+    </div>
+
+    <div style="text-align: center;">
+      <button class="button" onclick="showGameAchievement()">UNLOCK ACHIEVEMENT</button>
+      <button class="button" onclick="createGameEffect()">SPECIAL MOVE</button>
+    </div>
+  </div>
+
+  <script>
+    function createPixelBackground() {
+      const numPixels = 50;
+      for (let i = 0; i < numPixels; i++) {
+        const pixel = document.createElement('div');
+        pixel.className = 'pixel';
+        pixel.style.left = `${Math.random() * 100}%`;
+        pixel.style.setProperty('--duration', `${3 + Math.random() * 7}s`);
+        document.body.appendChild(pixel);
+      }
+    }
+
+    function showGameAchievement() {
+      const achievements = [
+        "🏆 ACHIEVEMENT UNLOCKED: Perfect Love Combo!",
+        "🎮 NEW RECORD: Most Adorable Player 2",
+        "⭐ RARE ACHIEVEMENT: Found True Love",
+        "🏅 LEGENDARY STATUS: Best Gamer Boyfriend",
+        "🌟 SECRET FOUND: Heart Successfully Captured"
+      ];
+      
+      const achievement = achievements[Math.floor(Math.random() * achievements.length)];
+      
+      const notification = document.createElement('div');
+      notification.className = 'achievement';
+      notification.innerHTML = achievement;
+      
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 4000);
+    }
+
+    function createGameEffect() {
+      const gameIcons = ['🎮', '🏆', '⭐', '💖', '🌟', '🎯'];
+      const numEffects = 30;
+      
+      for (let i = 0; i < numEffects; i++) {
+        setTimeout(() => {
+          const icon = document.createElement('div');
+          icon.style.position = 'fixed';
+          icon.style.left = `${Math.random() * 100}%`;
+          icon.style.top = `${Math.random() * 100}%`;
+          icon.style.fontSize = '24px';
+          icon.innerHTML = gameIcons[Math.floor(Math.random() * gameIcons.length)];
+          icon.style.animation = 'pixelFloat 3s linear forwards';
+          document.body.appendChild(icon);
+          
+          setTimeout(() => icon.remove(), 3000);
+        }, i * 100);
+      }
+    }
+
+    // Game character following mouse
+    let character = document.createElement('div');
+    character.className = 'game-character';
+    document.body.appendChild(character);
+
+    document.addEventListener('mousemove', (e) => {
+      character.style.left = (e.pageX - 20) + 'px';
+      character.style.top = (e.pageY - 20) + 'px';
+    });
+
+    // Inicializar efectos
+    createPixelBackground();
+    setInterval(() => {
+      const oldPixels = document.querySelectorAll('.pixel');
+      oldPixels.forEach(pixel => pixel.remove());
+      createPixelBackground();
+    }, 10000);
+
+    // Crear efecto inicial
+    setTimeout(createGameEffect, 1000);
+  </script>
+</body>
+</html>
